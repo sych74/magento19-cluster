@@ -8,7 +8,7 @@
 		"count": 1,
 		"cloudlets": 8,
 		"nodeGroup": "cp",
-		"links": ["sqldb:DB", "memcached:MEMCACHED"],
+		"links": ["sqldb:DB"],
 		"volumes": ["/var/www/webroot/ROOT"],
 		"displayName": "AppServer",
 		"volumeMounts": {
@@ -30,12 +30,6 @@
 		"nodeGroup": "sqldb",
 		"displayName": "Database"
 	}, {
-		"image": "devbeta/memcached:1.4.24",
-		"cloudlets": 4,
-		"count": 2,
-		"nodeGroup": "memcached",
-		"displayName": "Memcached"
-	}, {
 		"image": "devbeta/varnish:4.1.5",
 		"cloudlets": 8,
 		"count": 1,
@@ -44,7 +38,7 @@
 	}],
 	"ssl": true,
 	"globals": {
-		"PATH": "https://raw.githubusercontent.com/jelastic-jps/magento/dev/magento-cluster",
+		"PATH": "https://raw.githubusercontent.com/sych74/magento19-cluster/master",
 		"DB_USER": "jelastic-${fn.random}",
 		"DB_PASS": "${fn.password(20)}",
 		"MAGE_ROOT": "/var/www/webroot/ROOT",
@@ -113,7 +107,7 @@
 	"actions": {
 		"setupNode": [{
 			"cmd[${this.filter}]": [
-				"wget -O - ${globals.PATH}/scripts/setupCP_php7.sh | bash",
+				"wget -O - ${globals.PATH}/scripts/setupCP.sh | bash",
 				"wget ${globals.PATH}/configs/nginx.conf -O /etc/nginx/nginx.conf",
 				"wget ${globals.PATH}/configs/varnish-probe.php -O /data/varnish-probe.php",
 				"/etc/init.d/nginx restart"
