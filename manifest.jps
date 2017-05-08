@@ -4,7 +4,7 @@
 	"logo": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/images/magento_70x70.png",
 	"name": "Magento Cluster Template",
 	"nodes": [{
-		"image": "devbeta/nginxphp:1.10.1-php-7.0.10",
+		"image": "jelastic/nginxphp:1.10.1-php-7.0.10",
 		"count": 1,
 		"cloudlets": 8,
 		"nodeGroup": "cp",
@@ -30,7 +30,7 @@
 		"nodeGroup": "sqldb",
 		"displayName": "Database"
 	}, {
-		"image": "devbeta/varnish:4.1.5",
+		"image": "jelastic/varnish:4.1.5",
 		"cloudlets": 8,
 		"count": 1,
 		"nodeGroup": "bl",
@@ -71,7 +71,7 @@
 	}, {
 		"log": "Download and Unpack Content"
 	}, {
-		"cmd[storage]": "wget -qO- 'https://download.jelastic.com/public.php?service=files&t=b67fecb5a9255d7b3bd68aaeccaccac0&download' | tar xz -C /data"
+		"cmd[storage]": "wget -qO- '${globals.PATH}/magento/magento-1.9.2.4.tar.gz' | tar xz -C /data"
 	}, {
 		"log": "Adjust Configs"
 	}, {
@@ -108,7 +108,6 @@
 		"setupNode": [{
 			"cmd[${this.filter}]": [
 				"wget -O - ${globals.PATH}/scripts/setupCP.sh | bash",
-				"wget ${globals.PATH}/configs/nginx.conf -O /etc/nginx/nginx.conf",
 				"wget ${globals.PATH}/configs/varnish-probe.php -O /data/varnish-probe.php",
 				"/etc/init.d/nginx restart"
 			]
