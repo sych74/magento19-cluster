@@ -87,14 +87,15 @@
 		"installJps": {
 			"jps": "${globals.PATH}/addons/setup-magento.jps",
 			"settings": {
-
-				
-				
-				
+				"mage_root": "${globals.MAGE_ROOT}",
+				"admin_passwd": "${globals.ADMIN_PASSWD}",
+				"locale": "${globals.LOCALE}",
+				"timezone": "${globals.TIMEZONE}",
+				"currency": "${globals.CURRENCY}",
+				"db_host": "DB_1",
 				"db_user": "${globals.DB_USER}",
 				"db_pass": "${globals.DB_PASS}",
-				"db_host": "DB_1",
-				"admin_passwd": "${globals.ADMIN_PASSWD}"
+				
   			}
 		}
 	}, {
