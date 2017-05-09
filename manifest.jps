@@ -72,7 +72,7 @@
 		"log": "Download and Unpack Content"
 	}, {
 		"cmd[storage]": [
-			"wget -qO- '${globals.PATH}/magento/magento-1.9.2.4.tar.gz' | tar xz -C /tmp",
+			"wget -qO- '${globals.PATH}/magento/magento-1.9.2.1.tar.gz' | tar xz -C /tmp",
 			"mv /tmp/magento/* /data"
 		]
 	}, {
