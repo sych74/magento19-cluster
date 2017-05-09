@@ -80,8 +80,6 @@
 			"mv /tmp/magento-mirror-${globals.MAGENTO_VERSION}/* /tmp/magento-mirror-${globals.MAGENTO_VERSION}/.htaccess ${globals.MAGE_ROOT}"
 		]
 	}, {
-		"log": "Adjust Configs"
-	}, {
 		"log": "Setup Magento Content"
 	}, {
 		"installJps": {
@@ -120,6 +118,7 @@
 		"setupNode": [{
 			"cmd[${this.filter}]": [
 				"wget -O - ${globals.PATH}/scripts/setupCP.sh | bash",
+				"wget ${globals.PATH}/configs/nginx.conf -O /etc/nginx/nginx.conf",
 				"wget ${globals.PATH}/configs/varnish-probe.php -O /data/varnish-probe.php",
 				"/etc/init.d/nginx restart"
 			]
