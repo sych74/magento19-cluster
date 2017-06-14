@@ -73,7 +73,7 @@
             }
         }
     }, {
-        "log": "Downloading, Unpacking and Patching Magento"
+        "log": "Downloading, Unpacking, Installation and Patching Magento"
     }, {
         "cmd[admin]": [
             "wget -qO- 'https://codeload.github.com/OpenMage/magento-mirror/tar.gz/${globals.MAGENTO_VERSION}' | tar xz -C /tmp",
