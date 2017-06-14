@@ -38,7 +38,7 @@
         "displayName": "Balancer"
     }],
     "globals": {
-        "PATH": "https://raw.githubusercontent.com/sych74/magento19-cluster/master",
+        "PATH": "https://raw.githubusercontent.com/sych74/magento19-cluster/dev",
         "MAGENTO_VERSION": "1.9.2.1",
         "DB_USER": "jelastic-${fn.random}",
         "DB_PASS": "${fn.password(20)}",
@@ -73,11 +73,13 @@
             }
         }
     }, {
-        "log": "Download and Unpack Content"
+        "log": "Downloading, Unpacking and Patching Magento"
     }, {
         "cmd[admin]": [
             "wget -qO- 'https://codeload.github.com/OpenMage/magento-mirror/tar.gz/${globals.MAGENTO_VERSION}' | tar xz -C /tmp",
-            "mv /tmp/magento-mirror-${globals.MAGENTO_VERSION}/* /tmp/magento-mirror-${globals.MAGENTO_VERSION}/.htaccess /var/www/webroot/ROOT"
+            "mv /tmp/magento-mirror-${globals.MAGENTO_VERSION}/* /tmp/magento-mirror-${globals.MAGENTO_VERSION}/.htaccess ${globals.MAGE_ROOT}",
+            "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php",
+            "wget ${globals.PATH}/configs/magento/local.xml.template -O ${globals.MAGE_ROOT}/app/etc/local.xml.template"
         ]
     }, {
         "log": "Setup Magento Content"
