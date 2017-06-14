@@ -38,7 +38,7 @@
         "displayName": "Balancer"
     }],
     "globals": {
-        "PATH": "https://raw.githubusercontent.com/sych74/magento19-cluster/master",
+        "PATH": "https://raw.githubusercontent.com/sych74/magento19-cluster/dev",
         "MAGENTO_VERSION": "1.9.2.1",
         "DB_USER": "jelastic-${fn.random}",
         "DB_PASS": "${fn.password(20)}",
