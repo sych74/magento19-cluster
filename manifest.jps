@@ -8,16 +8,22 @@
         "count": 2,
         "cloudlets": 16,
         "nodeGroup": "cp",
-        "links": ["sqldb:DB"],
+        "links": ["sqldb:DB", "rdc:RDC", "rds:RDS"],
         "volumes": ["/var/www/webroot/ROOT"],
         "displayName": "AppServer",
-        "volumeMounts": {
+        "volumeMounts": [{
             "/var/www/webroot/ROOT": {
                 "readOnly": false,
                 "sourcePath": "/var/www/webroot/ROOT",
                 "sourceNodeGroup": "admin"
             }
-        }
+        }, {
+            "/etc/nginx": {
+                "readOnly": false,
+                "sourcePath": "/etc/nginx",
+                "sourceNodeGroup": "admin"
+            }
+        }]
     }, {
         "image": "jelastic/nginxphp:1.10.1-php-7.0.10",
         "cloudlets": 16,
@@ -36,6 +42,16 @@
         "count": 2,
         "nodeGroup": "bl",
         "displayName": "Balancer"
+    }, {
+        "image": "redis",
+        "cloudlets": 16,
+        "nodeGroup": "rdc",
+        "displayName": "Redis cache"
+    }, {
+        "image": "redis",
+        "cloudlets": 16,
+        "nodeGroup": "rds",
+        "displayName": "Redis storage"
     }],
     "globals": {
         "PATH": "https://raw.githubusercontent.com/sych74/magento19-cluster/dev",
@@ -43,7 +59,7 @@
         "MAGE_ROOT": "/var/www/webroot/ROOT",
         "DB_USER": "jelastic-${fn.random}",
         "DB_PASS": "${fn.password(20)}",
-        "DB_NAME": "magento"
+        "DB_NAME": "magento",
         "ADMIN_PASSWD": "${fn.password(10)}"
     },
     "success": "Below you will find your admin panel link, username and password.</br></br> <table style='font-size:13px; border: none;'><tr><td>Admin panel URL:</td><td style='padding-left: 10px;'><a href='${env.protocol}://${env.domain}/admin/' target='_blank'>${env.protocol}://${env.domain}/admin/</a></td></tr>  <tr><td>Admin name:</td><td style='padding-left: 10px;'>admin</td></tr><tr><td>Password:</td><td style='padding-left: 10px;'>${globals.ADMIN_PASSWD}</td></tr></table></br>To add custom domain name for your Magento Cluster installation follow the steps described in our <a href='http://docs.jelastic.com/custom-domains' target='_blank'>documentation</a>",
@@ -62,10 +78,8 @@
             }
         }
     }, {
-        "log": "CP Layer Setup"
-    }, {
-        "forEach(nodes.cp)": {
-            "setupNode": {
+        "forEach(nodes.bl)": {
+            "setupBLNode": {
                 "filter": "${@i.id}",
                 "intIP": "${@i.intIP}"
             }
@@ -74,17 +88,26 @@
         "log": "Downloading, Unpacking, Installation and Patching Magento"
     }, {
         "cmd[admin]": [
+            "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf && wget ${globals.PATH}/configs/nginx/site-default.conf -O /etc/nginx/conf.d/site-default.conf",
             "wget -qO- 'https://codeload.github.com/OpenMage/magento-mirror/tar.gz/${globals.MAGENTO_VERSION}' | tar xz -C /tmp",
             "mv /tmp/magento-mirror-${globals.MAGENTO_VERSION}/* /tmp/magento-mirror-${globals.MAGENTO_VERSION}/.htaccess ${globals.MAGE_ROOT}",
             "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php",
             "wget ${globals.PATH}/configs/magento/local.xml.template -O ${globals.MAGE_ROOT}/app/etc/local.xml.template",
             "wget -O - ${globals.PATH}/scripts/setupMG.sh ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD} ${globals.MAGE_ROOT} ${env.url} ${user.email} | bash",
-            "chown nginx:nginx -R ${globals.MAGE_ROOT}/*"
+            "chown nginx:nginx -R ${globals.MAGE_ROOT}/*",
+            "service nginx restart"
         ]
+    }, {
+        "forEach(nodes.cp)": {
+            "setupCPNode": {
+                "filter": "${@i.id}",
+                "intIP": "${@i.intIP}"
+            }
+        }
     }],
     "onAfterScaleOut[nodeGroup:cp]": [{
         "forEach(event.response.nodes)": {
-            "setupNode": {
+            "setupCPNode": {
                 "filter": "${@i.id}",
                 "intIP": "${@i.intIP}"
             }
@@ -92,18 +115,16 @@
     }],
     "onBeforeScaleIn[nodeGroup:cp]": {
         "forEach(event.response.nodes)": {
-            "removeNode": {
+            "removeCPNode": {
                 "intIP": "${@i.intIP}"
             }
         }
     },
     "actions": {
-        "setupNode": [{
+        "setupCPNode": [{
             "cmd[${this.filter}]": [
                 "wget -O - ${globals.PATH}/scripts/setupCP.sh | bash",
-                "wget ${globals.PATH}/configs/nginx.conf -O /etc/nginx/nginx.conf",
-                "wget ${globals.PATH}/configs/varnish-probe.php -O /data/varnish-probe.php",
-                "/etc/init.d/nginx restart"
+                "service nginx restart"
             ]
         }, {
             "cmd[bl]": [
@@ -112,10 +133,16 @@
                 "service varnish reload"
             ]
         }],
-        "removeNode": {
+        "removeCPNode": {
             "cmd[bl]": [
                 "jem balancer RemoveCommonHost -h ${this.intIP}",
                 "service varnish reload"
+            ]
+        },
+        "setupBLNode": {
+            "cmd[bl]": [
+                "wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
+                "wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl"
             ]
         }
     }
