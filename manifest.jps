@@ -88,7 +88,6 @@
         "log": "Downloading, Unpacking, Installation and Patching Magento"
     }, {
         "cmd[admin]": [
-            "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf && wget ${globals.PATH}/configs/nginx/site-default.conf -O /etc/nginx/conf.d/site-default.conf",
             "wget -qO- 'https://codeload.github.com/OpenMage/magento-mirror/tar.gz/${globals.MAGENTO_VERSION}' | tar xz -C /tmp",
             "mv /tmp/magento-mirror-${globals.MAGENTO_VERSION}/* /tmp/magento-mirror-${globals.MAGENTO_VERSION}/.htaccess ${globals.MAGE_ROOT}",
             "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php",
@@ -123,7 +122,8 @@
     "actions": {
         "setupCPNode": [{
             "cmd[${this.filter}]": [
-                "wget -O - ${globals.PATH}/scripts/setupCP.sh | bash",
+                "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf",
+                "wget ${globals.PATH}/configs/nginx/site-default.conf -O /etc/nginx/conf.d/site-default.conf",
                 "service nginx restart"
             ]
         }, {
