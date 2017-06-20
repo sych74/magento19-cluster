@@ -1,15 +1,15 @@
 #!/bin/bash
 
-MYSQL = `which mysql`
-SED = `which sed`
-DB_USER = $1
-DB_PASS = $2
-DB_HOST = $3
-DB_NAME = $4
-MG_ADMIN = $5
-MG_PATH = $6
-ENV_URL = $7
-USER_EMAIL = $8
+MYSQL=`which mysql`
+SED=`which sed`
+DB_USER=$1
+DB_PASS=$2
+DB_HOST=$3
+DB_NAME=$4
+MG_ADMIN=$5
+MG_PATH=$6
+ENV_URL=$7
+USER_EMAIL=$8
 
 $MYSQL -u${DB_USER} -p${DB_PASS} -h ${DB_HOST} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
 php -f ${MG_PATH}/install.php -- \
@@ -32,4 +32,4 @@ php -f ${MG_PATH}/install.php -- \
 --admin_email ${USER_EMAIL} \
 --admin_username admin \
 --admin_password ${MG_ADMIN};
-$SED -i 's|getBlock($callback[0])->$callback[1]|getBlock($callback[0])->{$callback[1]}|g' ${MG_PATH}/app/code/core/Mage/Core/Model/Layout.php;
+$SED -i 's|getBlock(\$callback\[0\])->\$callback\[1\]|getBlock(\$callback\[0\])->{\$callback\[1\]}|g' ${MG_PATH}/app/code/core/Mage/Core/Model/Layout.php;
