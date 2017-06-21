@@ -76,6 +76,15 @@
             }
         }
     }, {
+        "installJps": {
+            "jps": "https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/proxysql/scripts/proxy-configuration.jps",
+            "settings": {
+                "admin_pass": "${globals.ADMIN_PASSWD}",
+                "db_user": "${globals.DB_USER",
+                "db_pass": "${globals.DB_PASS}"
+            }
+        }
+    }, {
         "forEach(nodes.bl)": {
             "setupBLNode": {
                 "filter": "${@i.id}",
