@@ -73,15 +73,15 @@ return (deliver);
 
 }
 
-sub vcl_synth {
+#sub vcl_synth {
 
     # ..... REWRITE HTTP to HTTPS .....
-    if (resp.status == 750) {
-        set resp.status = 301;
-        set resp.http.Location = "https://" + req.http.host + req.url;
-        return(deliver);
-    }
-}
+#    if (resp.status == 750) {
+#        set resp.status = 301;
+#        set resp.http.Location = "https://" + req.http.host + req.url;
+#        return(deliver);
+#    }
+#}
 
 sub vcl_deliver {
   if (resp.http.X-Magento-Debug) {
