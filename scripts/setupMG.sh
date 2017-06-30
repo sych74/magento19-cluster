@@ -34,4 +34,4 @@ php -f ${MG_PATH}/install.php -- \
 --admin_password ${MG_ADMIN};
 $SED -i 's|getBlock(\$callback\[0\])->\$callback\[1\]|getBlock(\$callback\[0\])->{\$callback\[1\]}|g' ${MG_PATH}/app/code/core/Mage/Core/Model/Layout.php;
 $SED -i 's|false|true|g' ${MG_PATH}/app/etc/modules/Cm_RedisSession.xml;
-rm -rf ${MG_PATH}/var/*;
+#rm -rf ${MG_PATH}/var/*;
