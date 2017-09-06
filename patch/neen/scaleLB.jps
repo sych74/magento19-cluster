@@ -1,9 +1,9 @@
 {
 	"jpsType": "update",
-	"description": "This patch is designed for varnish configure .",
+	"description": "This patch is designed for scale of varnish nodes.",
 	"logo": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/images/magento_70x70.png",
 	"name": "Varnish configure",
-	"success": "Patch success applyed",
+	"success": "The patch has successfully deployed",
 	"onAfterScaleOut[nodeGroup:bl]": {
 		"forEach(event.response.nodes)": [{
 			"cmd[${@i.id}]": "service varnish stop"
