@@ -1,16 +1,10 @@
 vcl 4.0;
 import std;
 import directors;
-backend serv2 { .host = "192.168.20.84"; .port = "80"; .probe = {.url = "/varnish-probe.php"; .timeout = 30s; .interval = 60s; .window = 5; .threshold = 2; } }
-backend serv1 { .host = "192.168.20.107"; .port = "80"; .probe = {.url = "/varnish-probe.php"; .timeout = 30s; .interval = 60s; .window = 5; .threshold = 2; } }
-
 
 sub vcl_init {
 	new myclust = directors.round_robin();
-	myclust.add_backend(serv2);
-	myclust.add_backend(serv1);
 }
-
 
 
 sub vcl_deliver {
