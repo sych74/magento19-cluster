@@ -1,0 +1,30 @@
+{
+	"jpsType": "update",
+	"description": "This patch is designed for varnish configure .",
+	"logo": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/images/magento_70x70.png",
+	"name": "Varnish configure",
+	"success": "Patch success applyed",
+	"id": "",
+	"onAfterScaleOut[nodeGroup:bl]": {
+		"forEach(event.response.nodes)": {
+			"setupBLNode": {
+				"filter": "${@i.id}"
+			}
+		}
+	},
+	"actions": {
+		"setupBLNode": [{
+			"cmd[${this.filter}]": "echo ASDASD > /home/asd"
+		}, {
+			"forEach(nodes.cp)": {
+				"cmd[${this.filter}]": [
+					"jem balancer addCommonHost -h ${@i.intIP} ",
+					"grep -q \".url = \"/\"\" /etc/varnish/default.vcl ||  sed -ri 's| .url = \"/\"|.url = \"/varnish-probe.php\"|g' /etc/varnish/default.vcl",
+					"service varnish reload"
+				]
+			}
+		}, {
+			"setNodeDisplayName[${this.filter}]": "Balancer"
+		}]
+	}
+}
