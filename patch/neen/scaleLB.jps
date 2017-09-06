@@ -4,20 +4,24 @@
 	"logo": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/images/magento_70x70.png",
 	"name": "Varnish configure",
 	"success": "Patch success applyed",
-	"id": "",
 	"onAfterScaleOut[nodeGroup:bl]": {
-		"forEach(event.response.nodes)": {
+		"forEach(event.response.nodes)": [{
+			"cmd[${@i.id}]": "service varnish stop"
+		}, {
 			"setupBLNode": {
 				"filter": "${@i.id}"
 			}
-		}
+		}, {
+			"cmd[${@i.id}]": "service varnish start"
+		}]
 	},
 	"actions": {
 		"setupBLNode": [{
 			"cmd[${this.filter}]": [
-				"wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /mnt/varnish_balancer.lib",
-            			"wget ${globals.PATH}/configs/varnish/default.vcl -O /mnt/default.vcl"
-
+				"wget https://raw.githubusercontent.com/sych74/magento19-cluster/master/patch/neen/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
+				"wget https://raw.githubusercontent.com/sych74/magento19-cluster/master/patch/neen/default.vlc -O /etc/varnish/default.vcl",
+                		"wget https://raw.githubusercontent.com/sych74/magento19-cluster/master/patch/neen/varnish -O /etc/rc.d/init.d/varnish && chmod +x /etc/rc.d/init.d/varnish"
+			]
 		}, {
 			"forEach(nodes.cp)": {
 				"cmd[${this.filter}]": [
