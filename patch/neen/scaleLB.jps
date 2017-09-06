@@ -14,13 +14,15 @@
 	},
 	"actions": {
 		"setupBLNode": [{
-			"cmd[${this.filter}]": "echo ASDASD > /home/asd"
+			"cmd[${this.filter}]": [
+				"wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /mnt/varnish_balancer.lib",
+            			"wget ${globals.PATH}/configs/varnish/default.vcl -O /mnt/default.vcl"
+
 		}, {
 			"forEach(nodes.cp)": {
 				"cmd[${this.filter}]": [
 					"jem balancer addCommonHost -h ${@i.intIP} ",
-					"grep -q \".url = \"/\"\" /etc/varnish/default.vcl ||  sed -ri 's| .url = \"/\"|.url = \"/varnish-probe.php\"|g' /etc/varnish/default.vcl",
-					"service varnish reload"
+					"grep -q \".url = \"/\"\" /etc/varnish/default.vcl ||  sed -ri 's| .url = \"/\"|.url = \"/varnish-probe.php\"|g' /etc/varnish/default.vcl"
 				]
 			}
 		}, {
