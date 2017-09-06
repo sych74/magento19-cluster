@@ -1,0 +1,163 @@
+#! /bin/sh
+#
+# varnish Control the Varnish Cache
+#
+# chkconfig:   - 85 15
+# description: Varnish is a high-perfomance HTTP accelerator
+# processname: varnishd
+# config: /etc/sysconfig/varnish
+# pidfile: /var/run/varnishd.pid
+
+### BEGIN INIT INFO
+# Provides: varnish
+# Required-Start: $network $local_fs $remote_fs
+# Required-Stop: $network $local_fs $remote_fs
+# Default-Start:
+# Default-Stop:
+# Should-Start: $syslog
+# Short-Description: start and stop varnishd
+# Description: Varnish is a high-perfomance HTTP accelerator
+### END INIT INFO
+
+# Source function library.
+
+[ -f /etc/init.d/functions ] && chmod +x /etc/init.d/functions;
+
+SYSTEMCTL_SKIP_REDIRECT=1;
+. /etc/init.d/functions
+
+exec="/usr/sbin/varnishd"
+reload_exec="/usr/sbin/varnish_reload_vcl"
+prog="varnishd"
+logprog="varnishlog"
+config="/etc/sysconfig/varnish/varnish"
+lockfile="/var/lock/subsys/varnish"
+pidfile="/run/varnish/varnish.pid"
+logpidfile="/run/varnish/varnishlog.pid"
+
+# Include varnish defaults
+[ -e /etc/sysconfig/varnish/varnish ] && . /etc/sysconfig/varnish/varnish
+
+[ ! -d /run/varnish/ ] && mkdir /run/varnish/
+chown varnish:varnish /var/log/varnish /run/varnish/
+
+function start {
+
+        if [ ! -x $exec ]
+        then
+                echo $exec not found
+                exit 5
+        fi
+
+        if [ ! -f $config ]
+        then
+                echo $config not found
+        fi
+        echo -n "Starting Varnish Cache: "
+
+        sudo service nginx start > /dev/null 2>&1;
+
+        local varnproc=`ps aux|grep varnishd|grep -v grep|awk '{print $2}'`;
+        [ -z "$varnproc" ] && rm -f ${pidfile};
+
+        local varnproc=`ps aux|grep varnishlog|grep -v grep|awk '{print $2}'`;
+        [ -z "$varnproc" ] && rm -f ${pidfile};
+
+        [ -z "$DAEMON_OPTS" ] && { DAEMON_OPTS=" -f /etc/varnish/default.vcl \
+        -T 0.0.0.0:80 \
+        -n /var/lib/varnish -P ${pidfile} \
+        -a 127.0.0.1:6082 \
+        -p vmod_dir=/usr/lib64/varnish/vmods/ \
+        -S /etc/varnish/secret \
+        -t 120 \
+        -p thread_pool_min=50 \
+        -p thread_pool_max=1000 \
+        -p thread_pool_timeout=120 \
+        -s malloc,80M \
+        -p vcl_dir=/etc/varnish/";}
+
+        if ! [ -f "${pidfile}" ]; then
+                "$exec" $DAEMON_OPTS
+                ret=$?
+
+                if [ $ret -ne "0" ]; then
+                        echo_failure 1>&2; echo; rm "${pidfile}"; return $ret;
+                else
+                        echo_success; echo;
+                fi
+
+        #        sleep 10;
+        #        [ ! -f "${logpidfile}" ] && { runuser -s /bin/bash - varnish -c "/usr/bin/varnishlog -A -a -n /var/lib/varnish -w /var/log/varnish/varnish.log -D -P ${logpidfile}"; }
+                return 0;
+        else
+                echo_success; echo;
+                return 0;
+        fi
+}
+
+stop() {
+        echo -n "Stopping Varnish Cache: "
+        sudo service nginx stop > /dev/null 2>&1;
+        killproc -p ${pidfile} ${prog}
+        killproc -p ${logpidfile} ${logprog}
+        retval=$?
+        echo
+        [ $retval -eq 0 ] && rm -f $lockfile
+        return $retval
+}
+
+
+restart() {
+        stop
+        start
+}
+
+reload() {
+        $reload_exec || restart
+}
+
+status() {
+        if [ -f ${pidfile} ]; then
+                echo "Varnish cache is running"
+        else
+                echo "Varnish cache is stopped"
+        fi
+}
+
+configtest() {
+        if [ -f "$VARNISH_VCL_CONF" ]; then
+                $exec -f "$VARNISH_VCL_CONF" -C -n /tmp > /dev/null && echo "Syntax ok"
+        else
+                echo "VARNISH_VCL_CONF is  unset or does not point to a file"
+        fi
+}
+
+case "$1" in
+        start)
+                $1
+                ;;
+        stop)
+                $1
+                ;;
+        restart)
+                $1
+                ;;
+        reload)
+                $1
+                ;;
+        status)
+                $1
+                ;;
+        forse-reload|condrestart|try-restart)
+                restart
+                ;;
+        configtest)
+                configtest
+                ;;
+        *)
+        echo "Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+
+        exit 2
+esac
+
+exit $?
