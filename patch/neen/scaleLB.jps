@@ -6,13 +6,11 @@
 	"success": "The patch has successfully deployed",
 	"onAfterScaleOut[nodeGroup:bl]": {
 		"forEach(event.response.nodes)": [{
-			"cmd[${@i.id}]": "service varnish stop"
-		}, {
 			"setupBLNode": {
 				"filter": "${@i.id}"
 			}
 		}, {
-			"cmd[${@i.id}]": "service varnish start"
+			"cmd[${@i.id}]": "service varnish restart"
 		}]
 	},
 	"actions": {
